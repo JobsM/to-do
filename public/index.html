@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌈 To‑Do com barras coloridas personalizadas</title>
+    <style>
+        /* Suas variáveis base */
+        :root {
+            --n8n-color: #6139ff;
+            --script-color: #ffad00;
+            --vc-color: #f5f5f5;
+            --red-color: #ff0000;
+            --market-color: #00c853;
+            --bg-dark: #0d0d0d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .card {
+            background-color: #1a1a1a;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 32px;
+            padding: 30px 28px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.03);
+            border: 1px solid #2a2a2a;
+        }
+
+        h1 {
+            color: var(--vc-color);
+            font-weight: 500;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        h1 span {
+            background: #2a2a2a;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 4px 14px;
+            border-radius: 40px;
+            color: #aaa;
+            border: 1px solid #3a3a3a;
+        }
+
+        /* painel de adicionar com escolha de cor */
+        .add-panel {
+            background: #242424;
+            border-radius: 60px;
+            padding: 6px 6px 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 24px 0 28px 0;
+            border: 1px solid #3a3a3a;
+            flex-wrap: wrap;
+        }
+
+        .add-panel input {
+            flex: 1;
+            min-width: 200px;
+            background: transparent;
+            border: none;
+            padding: 12px 5px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        .add-panel input::placeholder {
+            color: #777;
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e1e1e;
+            padding: 5px 15px;
+            border-radius: 40px;
+        }
+        .color-picker-group label {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+        .color-picker-group input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #3a3a3a;
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            padding: 2px;
+        }
+        .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-group input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .add-btn {
+            background: var(--market-color);
+            border: none;
+            color: black;
+            font-weight: 600;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        .add-btn:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        /* estatísticas */
+        .stats {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            background: #242424;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+        .stat-item.total {
+            border-left-color: var(--vc-color);
+            color: #ddd;
+        }
+        .stat-item.done {
+            border-left-color: var(--market-color);
+            color: #ddd;
+        }
+
+        /* lista de tarefas */
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 20px 0 20px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* cada tarefa = cartão com barra */
+        .task-item {
+            background: #202020;
+            border-radius: 24px;
+            padding: 18px 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2e2e2e;
+            transition: all 0.2s;
+        }
+        .task-item.completed {
+            opacity: 0.8;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        /* botão de "certo" (check circular) */
+        .check-btn {
+            background: transparent;
+            border: 2px solid #4a4a4a;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #4a4a4a;
+            font-size: 1.4rem;
+            font-weight: bold;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .check-btn.completed {
+            background: var(--market-color);
+            border-color: var(--market-color);
+            color: black;
+        }
+        .check-btn:hover {
+            border-color: var(--market-color);
+            color: var(--market-color);
+        }
+
+        .task-title {
+            flex: 1;
+            font-size: 1.2rem;
+            color: #eee;
+            word-break: break-word;
+        }
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        /* miniatura da cor da tarefa (círculo) */
+        .task-color-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+
+        /* barra de progresso individual */
+        .task-progress-bar {
+            width: 100%;
+            height: 18px;
+            background: #2c2c2c;
+            border-radius: 40px;
+            overflow: hidden;
+            margin-left: 52px; /* alinhamento com o header (espaço do check) */
+            margin-top: 4px;
+            border: 1px solid #3a3a3a;
+        }
+        .task-progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 40px;
+        }
+
+        /* pequeno controle de cor da barra */
+        .bar-color-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 52px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        .bar-color-control span {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+        .bar-color-picker {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #3a3a3a;
+            border-radius: 50%;
+            background: transparent;
+            padding: 2px;
+            cursor: pointer;
+        }
+        .bar-color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .bar-color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        /* ações da tarefa (remover) */
+        .task-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #ff5555;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .delete-btn:hover {
+            color: var(--red-color);
+            transform: scale(1.2);
+        }
+
+        .global-progress {
+            background: #2c2c2c;
+            height: 12px;
+            border-radius: 20px;
+            margin: 24px 0 10px;
+            overflow: hidden;
+        }
+        .global-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--n8n-color), var(--market-color));
+            transition: width 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .clear-btn {
+            background: #2a2a2a;
+            border: 1px solid #4a4a4a;
+            color: #ccc;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .clear-btn:hover {
+            background: #3a3a3a;
+            color: white;
+        }
+
+        /* scroll custom */
+        .todo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .todo-list::-webkit-scrollbar-track {
+            background: #1e1e1e;
+            border-radius: 10px;
+        }
+        .todo-list::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        ✅ Tarefas coloridas
+        <span>personalize cores</span>
+    </h1>
+
+    <!-- painel de adicionar com escolha de cor da tarefa e cor da barra -->
+    <div class="add-panel">
+        <input type="text" id="taskInput" placeholder="Nova tarefa... (ex: Revisar projeto)" autofocus>
+        <div class="color-picker-group">
+            <label>🎨 tarefa</label>
+            <input type="color" id="taskColorPicker" value="#6139ff">
+        </div>
+        <div class="color-picker-group">
+            <label>📊 barra</label>
+            <input type="color" id="barColorPicker" value="#00c853">
+        </div>
+        <button class="add-btn" id="addTaskBtn">+ Adicionar</button>
+    </div>
+
+    <!-- estatísticas -->
+    <div class="stats">
+        <div class="stat-item total" id="totalTasks">Total: 0</div>
+        <div class="stat-item done" id="doneTasks">Concluídas: 0</div>
+    </div>
+
+    <!-- barra global (opcional) -->
+    <div class="global-progress">
+        <div class="global-fill" id="globalFill"></div>
+    </div>
+
+    <!-- lista de tarefas -->
+    <div class="todo-list" id="todoListContainer"></div>
+
+    <!-- rodapé com botão limpar -->
+    <div class="footer-actions">
+        <button class="clear-btn" id="clearCompletedBtn">✔ Limpar concluídas</button>
+        <button class="clear-btn" id="clearAllBtn">🗑 Limpar tudo</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Elementos principais
+        const taskInput = document.getElementById('taskInput');
+        const taskColorPicker = document.getElementById('taskColorPicker');
+        const barColorPicker = document.getElementById('barColorPicker');
+        const addBtn = document.getElementById('addTaskBtn');
+        const container = document.getElementById('todoListContainer');
+        const totalSpan = document.getElementById('totalTasks');
+        const doneSpan = document.getElementById('doneTasks');
+        const globalFill = document.getElementById('globalFill');
+        const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+
+        // Array de tarefas
+        let tasks = [];
+
+        // Carregar do localStorage
+        function loadTasks() {
+            const saved = localStorage.getItem('todoColorTasks');
+            if (saved) {
+                try {
+                    tasks = JSON.parse(saved);
+                } catch (e) {
+                    tasks = [];
+                }
+            } else {
+                // Tarefas iniciais para exemplo
+                tasks = [
+                    { id: Date.now() + 1, text: 'Estudar React', completed: false, taskColor: '#6139ff', barColor: '#ffad00' },
+                    { id: Date.now() + 2, text: 'Fazer exercício', completed: true, taskColor: '#00c853', barColor: '#ff0000' },
+                    { id: Date.now() + 3, text: 'Ler artigo', completed: false, taskColor: '#ffad00', barColor: '#6139ff' },
+                ];
+            }
+        }
+
+        // Salvar
+        function saveTasks() {
+            localStorage.setItem('todoColorTasks', JSON.stringify(tasks));
+        }
+
+        // Atualizar estatísticas e barra global
+        function updateStats() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.completed).length;
+            totalSpan.innerText = `Total: ${total}`;
+            doneSpan.innerText = `Concluídas: ${done}`;
+            const percent = total === 0 ? 0 : (done / total) * 100;
+            globalFill.style.width = percent + '%';
+        }
+
+        // Renderizar todas as tarefas
+        function renderTasks() {
+            if (!container) return;
+            container.innerHTML = '';
+            if (tasks.length === 0) {
+                container.innerHTML = '<div style="color:#555; text-align:center; padding:30px;">Nenhuma tarefa. Adicione uma!</div>';
+                updateStats();
+                return;
+            }
+
+            tasks.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+                taskItem.dataset.id = task.id;
+
+                // Header com check, título, badge e delete
+                const header = document.createElement('div');
+                header.className = 'task-header';
+
+                // Botão check
+                const checkBtn = document.createElement('div');
+                checkBtn.className = `check-btn ${task.completed ? 'completed' : ''}`;
+                checkBtn.innerText = task.completed ? '✓' : '○';
+                checkBtn.setAttribute('role', 'button');
+                checkBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleTaskCompletion(task.id);
+                });
+
+                // Badge de cor da tarefa (círculo)
+                const colorBadge = document.createElement('div');
+                colorBadge.className = 'task-color-badge';
+                colorBadge.style.backgroundColor = task.taskColor || '#6139ff';
+
+                // Título
+                const titleSpan = document.createElement('span');
+                titleSpan.className = `task-title ${task.completed ? 'completed' : ''}`;
+                titleSpan.innerText = task.text;
+
+                // Ações (delete)
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'task-actions';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerText = '🗑';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteTask(task.id);
+                });
+                actionsDiv.appendChild(deleteBtn);
+
+                header.appendChild(checkBtn);
+                header.appendChild(colorBadge);
+                header.appendChild(titleSpan);
+                header.appendChild(actionsDiv);
+
+                // Barra de progresso individual (sempre visível)
+                const barContainer = document.createElement('div');
+                barContainer.className = 'task-progress-bar';
+
+                const barFill = document.createElement('div');
+                barFill.className = 'task-progress-fill';
+                barFill.style.width = task.completed ? '100%' : '0%';
+                barFill.style.backgroundColor = task.barColor || '#00c853'; // cor da barra
+
+                barContainer.appendChild(barFill);
+
+                // Controle para alterar cor da barra (pequeno seletor)
+                const barControlDiv = document.createElement('div');
+                barControlDiv.className = 'bar-color-control';
+                const barLabel = document.createElement('span');
+                barLabel.innerText = 'cor da barra:';
+                const barColorInput = document.createElement('input');
+                barColorInput.type = 'color';
+                barColorInput.className = 'bar-color-picker';
+                barColorInput.value = task.barColor || '#00c853';
+                barColorInput.addEventListener('input', (e) => {
+                    const newColor = e.target.value;
+                    updateBarColor(task.id, newColor);
+                });
+                barColorInput.addEventListener('change', (e) => {
+                    // garantia que salva após escolha
+                    const newColor = e.target.value;
+                    updateBarColor(task.id, newColor);
+                });
+
+                barControlDiv.appendChild(barLabel);
+                barControlDiv.appendChild(barColorInput);
+
+                // Monta tarefa
+                taskItem.appendChild(header);
+                taskItem.appendChild(barContainer);
+                taskItem.appendChild(barControlDiv);
+
+                container.appendChild(taskItem);
+            });
+
+            updateStats();
+        }
+
+        // Alternar concluído
+        function toggleTaskCompletion(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        // Atualizar cor da barra
+        function updateBarColor(id, newColor) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.barColor = newColor;
+                saveTasks();
+                // apenas re-renderiza para atualizar a cor da barra (evita lógica duplicada)
+                renderTasks();
+            }
+        }
+
+        // Deletar tarefa
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Adicionar nova tarefa
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (!text) {
+                alert('Digite uma descrição para a tarefa');
+                return;
+            }
+            const taskColor = taskColorPicker.value;
+            const barColor = barColorPicker.value;
+
+            const newTask = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                taskColor: taskColor,
+                barColor: barColor,
+            };
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            taskInput.value = '';
+            taskInput.focus();
+        }
+
+        // Limpar concluídas
+        function clearCompleted() {
+            tasks = tasks.filter(t => !t.completed);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Limpar todas
+        function clearAll() {
+            if (tasks.length > 0 && confirm('Remover todas as tarefas?')) {
+                tasks = [];
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        // Event listeners
+        addBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        clearCompletedBtn.addEventListener('click', clearCompleted);
+        clearAllBtn.addEventListener('click', clearAll);
+
+        // Inicializar
+        loadTasks();
+        renderTasks();
+        saveTasks(); // para garantir que as iniciais fiquem salvas
+    })();
+</script>
+</body>
+</html>
