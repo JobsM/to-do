@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MURILLO OS | NEURAL TASK INTERFACE</title>
+    
+    <!-- Google Fonts Avançadas -->
+    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@200;400;600;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 Pro (icons avançados) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css + Hover.css + Tailwind (via CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bibliotecas de animação avançadas -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
+    
+    <style>
+        /* Variáveis Tailwind customizadas */
+        :root {
+            --primary: #6139ff;
+            --secondary: #00f2ff;
+            --accent: #ff007a;
+            --bg-dark: #030014;
+            --glass: rgba(15, 15, 30, 0.7);
+            --border-glow: rgba(97, 57, 255, 0.3);
+        }
+
+        /* Efeitos visuais avançados */
+        body {
+            background: radial-gradient(ellipse at 20% 30%, #1a0b2e 0%, #030014 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Canvas de partículas */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Container principal */
+        .neural-container {
+            perspective: 2000px;
+            transform-style: preserve-3d;
+        }
+
+        /* Glassmorphism com glow */
+        .quantum-glass {
+            background: rgba(10, 10, 25, 0.7);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border: 1px solid rgba(97, 57, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(97, 57, 255, 0.1) inset;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quantum-glass:hover {
+            border-color: var(--primary);
+            box-shadow: 0 30px 60px -12px rgba(97, 57, 255, 0.3), 0 0 0 2px rgba(97, 57, 255, 0.2) inset;
+        }
+
+        /* Efeito de rotação 3D */
+        .tilt-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        /* Animações de brilho */
+        .glow-text {
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--secondary);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.8; filter: brightness(1); }
+            50% { opacity: 1; filter: brightness(1.3); text-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary); }
+        }
+
+        /* Barra de XP animada */
+        .xp-bar-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 30px;
+            padding: 3px;
+            border: 1px solid rgba(97, 57, 255, 0.3);
+        }
+
+        .xp-bar-fill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .xp-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Cards de tarefa com efeito holográfico */
+        .task-card {
+            background: linear-gradient(135deg, rgba(20, 15, 40, 0.8), rgba(10, 5, 20, 0.9));
+            border: 1px solid rgba(97, 57, 255, 0.2);
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 26px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .task-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: transparent;
+        }
+
+        /* Checkbox animado */
+        .neural-check {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .neural-check:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .neural-check.completed {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+        }
+
+        /* Seletor de cores customizado */
+        .color-selector {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-selector:hover {
+            transform: rotate(180deg);
+            border-color: var(--primary);
+        }
+
+        .color-selector input {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            cursor: pointer;
+        }
+
+        /* Botões com efeito líquido */
+        .liquid-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(97, 57, 255, 0.3);
+            border-radius: 40px;
+            padding: 12px 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .liquid-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .liquid-btn:hover::before {
+            width: 300px;
+            height: 300px;
+            opacity: 0.3;
+        }
+
+        /* Efeito de partículas nos cards */
+        .particle-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Rolagem customizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+
+        /* Animações de entrada */
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Grade holográfica */
+        .holographic-grid {
+            background-image: 
+                linear-gradient(rgba(97, 57, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(97, 57, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="text-white antialiased">
+
+    <!-- Partículas de fundo -->
+    <div id="particles-js"></div>
+    <div class="holographic-grid"></div>
+
+    <!-- Container principal com efeito 3D -->
+    <div class="neural-container min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-5xl relative animate__animated animate__fadeInUp">
+            
+            <!-- Header com efeito de rotação -->
+            <div class="quantum-glass rounded-[40px] p-8 mb-8 tilt-3d relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-r from-[#6139ff] to-[#00f2ff] opacity-20 rounded-full blur-3xl animate-pulse"></div>
+                
+                <div class="flex items-center justify-between flex-wrap gap-6">
+                    <div>
+                        <h1 class="font-['Syncopate'] text-3xl md:text-4xl font-bold tracking-[8px] glow-text">
+                            MURILLO <span class="text-[#00f2ff]">OS</span>
+                        </h1>
+                        <p class="text-gray-400 mt-2 text-sm tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-crown text-[#ffd700] animate-pulse"></i>
+                            NEURAL TASK INTERFACE v4.0
+                        </p>
+                    </div>
+                    
+                    <!-- Avatar de progresso -->
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <span class="text-3xl font-['Clash_Display'] font-bold bg-gradient-to-r from-[#6139ff] to-[#00f2ff] bg-clip-text text-transparent" id="levelDisplay">01</span>
+                            <span class="text-gray-400 text-sm block">NÍVEL OPERADOR</span>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-[#6139ff] to-[#00f2ff] p-[2px] animate-spin-slow">
+                            <div class="w-full h-full rounded-full bg-[#030014] flex items-center justify-center">
+                                <i class="fa-solid fa-robot text-3xl text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sistema de progresso neural -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-black/30 rounded-2xl p-4 border border-[#6139ff]/20">
+                        <i class="fa-solid fa-bolt text-[#00f2ff] text-xl mb-2"></i>
+                        <span class="text-2xl font-bold font-['Clash_Display'] block" id="xpTotal">0</span>
+                        <span class="text-gray-400 text-xs">XP ACUMULADO</span>
+                    </div>
+                    <div class="bg-black/30 rounded-2xl p-4 border border-[#6139ff]/20">
+                        <i class="fa-solid fa-target text-[#ff007a] text-xl mb-2"></i>
+                        <span class="text-2xl font-bold font-['Clash_Display'] block" id="missionsTotal">0</span>
+                        <span class="text-gray-400 text-xs">MISSÕES ATIVAS</span>
+                    </div>
+                    <div class="bg-black/30 rounded-2xl p-4 border border-[#6139ff]/20">
+                        <i class="fa-solid fa-trophy text-[#ffd700] text-xl mb-2"></i>
+                        <span class="text-2xl font-bold font-['Clash_Display'] block" id="completedTotal">0</span>
+                        <span class="text-gray-400 text-xs">CONCLUÍDAS</span>
+                    </div>
+                    <div class="bg-black/30 rounded-2xl p-4 border border-[#6139ff]/20">
+                        <i class="fa-solid fa-gem text-[#6139ff] text-xl mb-2"></i>
+                        <span class="text-2xl font-bold font-['Clash_Display'] block" id="nextLevelXP">500</span>
+                        <span class="text-gray-400 text-xs">PRÓXIMO NÍVEL</span>
+                    </div>
+                </div>
+
+                <!-- Barra de XP detalhada -->
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm text-gray-400 mb-2">
+                        <span><i class="fa-regular fa-circle-play text-[#6139ff]"></i> PROGRESSO NEURAL</span>
+                        <span class="font-mono" id="xpPercent">0%</span>
+                    </div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill h-4" id="xpBarFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de criação de missão -->
+            <div class="quantum-glass rounded-[40px] p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <div class="flex-1 w-full">
+                        <div class="relative">
+                            <i class="fa-solid fa-circle-nodes absolute left-4 top-1/2 -translate-y-1/2 text-[#6139ff]"></i>
+                            <input type="text" id="missionInput" placeholder="NOVA MISSÃO QUÂNTICA..." 
+                                   class="w-full bg-black/30 border border-[#6139ff]/30 rounded-full py-4 pl-12 pr-4 text-white placeholder-gray-500 focus:border-[#00f2ff] focus:outline-none focus:ring-2 focus:ring-[#00f2ff]/20 transition-all">
+                        </div>
+                    </div>
+                    
+                    <!-- Seletores de cor avançados -->
+                    <div class="flex items-center gap-3">
+                        <div class="color-selector">
+                            <input type="color" id="primaryColor" value="#6139ff">
+                        </div>
+                        <div class="color-selector">
+                            <input type="color" id="secondaryColor" value="#00f2ff">
+                        </div>
+                        <div class="color-selector">
+                            <input type="color" id="accentColor" value="#ff007a">
+                        </div>
+                    </div>
+
+                    <!-- Botão de adicionar com efeito -->
+                    <button id="addMissionBtn" class="liquid-btn group flex items-center gap-3 text-white">
+                        <i class="fa-solid fa-circle-plus text-xl group-hover:rotate-90 transition-transform"></i>
+                        <span class="hidden md:inline">ATIVAR MISSÃO</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de missões -->
+            <div class="quantum-glass rounded-[40px] p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-['Syncopate'] text-sm tracking-[4px] text-gray-300">
+                        <i class="fa-regular fa-rectangle-list text-[#6139ff] mr-2"></i>
+                        MISSÕES ATIVAS
+                    </h2>
+                    <div class="flex gap-2">
+                        <button onclick="sortByPriority()" class="w-10 h-10 rounded-full bg-black/30 border border-[#6139ff]/30 hover:border-[#00f2ff] transition-all">
+                            <i class="fa-solid fa-arrow-down-wide-short text-[#00f2ff]"></i>
+                        </button>
+                        <button onclick="clearCompleted()" class="w-10 h-10 rounded-full bg-black/30 border border-[#6139ff]/30 hover:border-[#ff007a] transition-all">
+                            <i class="fa-solid fa-broom text-[#ff007a]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Container das tarefas -->
+                <div id="missionsContainer" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <!-- As tarefas serão inseridas aqui via JS -->
+                </div>
+
+                <!-- Footer com estatísticas -->
+                <div class="mt-8 pt-6 border-t border-[#6139ff]/20 flex justify-between items-center">
+                    <div class="text-xs text-gray-400">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="lastUpdate"></span>
+                    </div>
+                    <button onclick="resetSystem()" class="text-xs text-gray-500 hover:text-[#ff007a] transition-colors">
+                        <i class="fa-regular fa-trash-can mr-1"></i>
+                        REINICIAR SISTEMA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de XP e missões
+        class MissionOS {
+            constructor() {
+                this.missions = JSON.parse(localStorage.getItem('neural_missions')) || [];
+                this.xp = parseInt(localStorage.getItem('neural_xp')) || 0;
+                this.level = Math.floor(this.xp / 500) + 1;
+                this.initParticles();
+                this.initGSAPEffects();
+                this.render();
+            }
+
+            initParticles() {
+                particlesJS('particles-js', {
+                    particles: {
+                        number: { value: 80, density: { enable: true, value_area: 800 } },
+                        color: { value: '#6139ff' },
+                        shape: { type: 'circle' },
+                        opacity: { value: 0.5, random: true },
+                        size: { value: 3, random: true },
+                        line_linked: {
+                            enable: true,
+                            distance: 150,
+                            color: '#6139ff',
+                            opacity: 0.2,
+                            width: 1
+                        },
+                        move: {
+                            enable: true,
+                            speed: 2,
+                            direction: 'none',
+                            random: true,
+                            straight: false,
+                            out_mode: 'out'
+                        }
+                    },
+                    interactivity: {
+                        detect_on: 'canvas',
+                        events: {
+                            onhover: { enable: true, mode: 'repulse' },
+                            onclick: { enable: true, mode: 'push' }
+                        }
+                    }
+                });
+            }
+
+            initGSAPEffects() {
+                // Animação de entrada dos cards
+                gsap.from('.task-card', {
+                    duration: 0.6,
+                    opacity: 0,
+                    y: 50,
+                    stagger: 0.1,
+                    ease: 'back.out(1.7)'
+                });
+
+                // Efeito 3D no container
+                document.querySelector('.neural-container').addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                    gsap.to('.tilt-3d', {
+                        duration: 0.5,
+                        rotateX: y,
+                        rotateY: -x,
+                        ease: 'power2.out'
+                    });
+                });
+            }
+
+            celebrate() {
+                // Confetti avançado
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#6139ff', '#00f2ff', '#ff007a']
+                });
+
+                // Animação de explosão de partículas
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        confetti({
+                            particleCount: 50,
+                            angle: 60 + i * 30,
+                            spread: 55,
+                            origin: { x: 0.2 + i * 0.15, y: 0.8 }
+                        });
+                    }, i * 200);
+                }
+
+                // Efeito sonoro virtual (vibração)
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            }
+
+            addMission(text, primaryColor, secondaryColor, accentColor) {
+                const mission = {
+                    id: Date.now(),
+                    text: text.toUpperCase(),
+                    primaryColor: primaryColor || '#6139ff',
+                    secondaryColor: secondaryColor || '#00f2ff',
+                    accentColor: accentColor || '#ff007a',
+                    completed: false,
+                    xpValue: 150,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.missions.unshift(mission);
+                this.save();
+                this.animateNewMission();
+            }
+
+            animateNewMission() {
+                gsap.from('.task-card:first-child', {
+                    duration: 0.8,
+                    scale: 0,
+                    rotation: 360,
+                    opacity: 0,
+                    ease: 'elastic.out(1, 0.5)'
+                });
+            }
+
+            toggleMission(id) {
+                const mission = this.missions.find(m => m.id === id);
+                if (mission) {
+                    mission.completed = !mission.completed;
+                    
+                    if (mission.completed) {
+                        this.xp += mission.xpValue;
+                        this.celebrate();
+                        this.showFloatingXP(mission.xpValue);
+                    } else {
+                        this.xp -= mission.xpValue;
+                    }
+                    
+                    this.save();
+                }
+            }
+
+            showFloatingXP(amount) {
+                const floatDiv = document.createElement('div');
+                floatDiv.className = 'fixed text-2xl font-bold pointer-events-none animate-float';
+                floatDiv.style.left = '50%';
+                floatDiv.style.top = '50%';
+                floatDiv.style.color = '#00f2ff';
+                floatDiv.style.zIndex = '9999';
+                floatDiv.innerHTML = `+${amount} XP <i class="fa-solid fa-bolt"></i>`;
+                document.body.appendChild(floatDiv);
+                
+                gsap.to(floatDiv, {
+                    duration: 1.5,
+                    y: -100,
+                    opacity: 0,
+                    ease: 'power2.out',
+                    onComplete: () => floatDiv.remove()
+                });
+            }
+
+            deleteMission(id) {
+                const index = this.missions.findIndex(m => m.id === id);
+                if (index > -1) {
+                    const mission = this.missions[index];
+                    if (!mission.completed) {
+                        this.xp -= mission.xpValue;
+                    }
+                    this.missions.splice(index, 1);
+                    
+                    // Animação de deletar
+                    gsap.to(`[data-id="${id}"]`, {
+                        duration: 0.5,
+                        x: -100,
+                        opacity: 0,
+                        rotation: -10,
+                        ease: 'power2.in',
+                        onComplete: () => this.save()
+                    });
+                }
+            }
+
+            save() {
+                localStorage.setItem('neural_missions', JSON.stringify(this.missions));
+                localStorage.setItem('neural_xp', this.xp);
+                this.render();
+            }
+
+            render() {
+                const container = document.getElementById('missionsContainer');
+                if (!container) return;
+
+                const level = Math.floor(this.xp / 500) + 1;
+                const currentLevelXP = this.xp % 500;
+                const percentToNext = (currentLevelXP / 500) * 100;
+                const completed = this.missions.filter(m => m.completed).length;
+
+                // Atualizar UI
+                document.getElementById('levelDisplay').innerText = level.toString().padStart(2, '0');
+                document.getElementById('xpTotal').innerText = this.xp;
+                document.getElementById('missionsTotal').innerText = this.missions.length;
+                document.getElementById('completedTotal').innerText = completed;
+                document.getElementById('nextLevelXP').innerText = 500 - currentLevelXP;
+                document.getElementById('xpPercent').innerText = Math.floor(percentToNext) + '%';
+                document.getElementById('xpBarFill').style.width = percentToNext + '%';
+                document.getElementById('lastUpdate').innerHTML = ` ÚLTIMA ATUALIZAÇÃO: ${new Date().toLocaleTimeString()}`;
+
+                // Renderizar missões
+                if (this.missions.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-16 animate-pulse">
+                            <i class="fa-regular fa-circle-radiation text-6xl text-[#6139ff]/30 mb-4"></i>
+                            <p class="text-gray-500">NENHUMA MISSÃO ATIVA</p>
+                            <p class="text-xs text-gray-600 mt-2">CRIE UMA NOVA MISSÃO PARA INICIAR</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.missions.map(mission => `
+                    <div data-id="${mission.id}" class="task-card p-6 group" style="border-left: 4px solid ${mission.primaryColor}">
+                        <div class="flex items-center gap-4">
+                            <div onclick="os.toggleMission(${mission.id})" 
+                                 class="neural-check ${mission.completed ? 'completed' : ''} cursor-pointer">
+                                ${mission.completed ? '<i class="fa-solid fa-check text-black"></i>' : ''}
+                            </div>
+                            
+                            <div class="flex-1">
+                                <h3 class="font-['Clash_Display'] text-lg" style="color: ${mission.primaryColor}">${mission.text}</h3>
+                                <div class="flex items-center gap-4 mt-2 text-xs">
+                                    <span class="text-gray-400">
+                                        <i class="fa-regular fa-clock"></i> ${new Date(mission.createdAt).toLocaleTimeString()}
+                                    </span>
+                                    <span class="text-[#00f2ff]">
+                                        <i class="fa-regular fa-bolt"></i> ${mission.xpValue} XP
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2">
+                                <button onclick="os.deleteMission(${mission.id})" 
+                                        class="w-8 h-8 rounded-full bg-black/30 border border-[#ff007a]/30 hover:border-[#ff007a] hover:text-[#ff007a] transition-all">
+                                    <i class="fa-regular fa-trash-can text-sm"></i>
+                                </button>
+                                <button onclick="os.customizeMission(${mission.id})"
+                                        class="w-8 h-8 rounded-full bg-black/30 border border-[#6139ff]/30 hover:border-[#6139ff] hover:text-[#6139ff] transition-all">
+                                    <i class="fa-regular fa-palette text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Mini barra de progresso -->
+                        <div class="mt-4 ml-[52px]">
+                            <div class="h-1 bg-black/30 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500" 
+                                     style="width: ${mission.completed ? '100%' : '0%'}; background: linear-gradient(90deg, ${mission.primaryColor}, ${mission.secondaryColor})">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Animar novos cards
+                gsap.from('.task-card', {
+                    duration: 0.4,
+                    opacity: 0,
+                    y: 20,
+                    stagger: 0.05,
+                    ease: 'power2.out'
+                });
+            }
+
+            customizeMission(id) {
+                const mission = this.missions.find(m => m.id === id);
+                if (mission) {
+                    // Abrir painel de customização
+                    const newPrimary = prompt('Nova cor primária (hex):', mission.primaryColor);
+                    if (newPrimary) {
+                        mission.primaryColor = newPrimary;
+                        this.save();
+                    }
+                }
+            }
+        }
+
+        // Inicialização
+        const os = new MissionOS();
+        window.os = os;
+
+        // Event Listeners
+        document.getElementById('addMissionBtn').addEventListener('click', () => {
+            const input = document.getElementById('missionInput');
+            if (input.value.trim()) {
+                const primary = document.getElementById('primaryColor').value;
+                const secondary = document.getElementById('secondaryColor').value;
+                const accent = document.getElementById('accentColor').value;
+                
+                os.addMission(input.value, primary, secondary, accent);
+                input.value = '';
+            }
+        });
+
+        document.getElementById('missionInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('addMissionBtn').click();
+            }
+        });
+
+        // Funções globais
+        function sortByPriority() {
+            os.missions.sort((a, b) => a.completed - b.completed);
+            os.save();
+        }
+
+        function clearCompleted() {
+            os.missions = os.missions.filter(m => !m.completed);
+            os.save();
+        }
+
+        function resetSystem() {
+            if (confirm('REINICIAR SISTEMA NEURAL? TODO O PROGRESSO SERÁ PERDIDO.')) {
+                os.missions = [];
+                os.xp = 0;
+                os.save();
+                
+                // Efeito de reset
+                gsap.to('.quantum-glass', {
+                    duration: 0.5,
+                    scale: 0.95,
+                    opacity: 0.5,
+                    yoyo: true,
+                    repeat: 1
+                });
+            }
+        }
+
+        // Atualizar cores em tempo real
+        document.getElementById('primaryColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--primary', e.target.value);
+        });
+        document.getElementById('secondaryColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--secondary', e.target.value);
+        });
+        document.getElementById('accentColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--accent', e.target.value);
+        });
+
+        // Efeito de digitação
+        let typingTimer;
+        document.getElementById('missionInput').addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                // Feedback de digitação
+            }, 500);
+        });
+    </script>
+
+    <style>
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 10s linear infinite;
+        }
+    </style>
+</body>
+</html>
